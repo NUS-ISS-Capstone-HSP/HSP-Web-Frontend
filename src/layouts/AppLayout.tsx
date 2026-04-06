@@ -1,6 +1,7 @@
 import {
   DashboardOutlined,
   LogoutOutlined,
+  SendOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Layout, Menu, Space, Typography } from 'antd'
@@ -15,6 +16,11 @@ const menuItems = [
     icon: <DashboardOutlined />,
     label: 'Dashboard',
   },
+  {
+    key: '/dispatch',
+    icon: <SendOutlined />,
+    label: 'Dispatch',
+  },
 ]
 
 export function AppLayout() {
@@ -23,9 +29,8 @@ export function AppLayout() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
 
-  const selectedKey = location.pathname.startsWith('/dashboard')
-    ? '/dashboard'
-    : ''
+  const selectedKey =
+    menuItems.find((item) => location.pathname.startsWith(item.key))?.key ?? ''
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

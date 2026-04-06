@@ -1,0 +1,41 @@
+.dispatch-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dispatch-card {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.dispatch-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.dispatch-result-card {
+  margin-top: 16px;
+  border-radius: 10px;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
+}
+
+@media (max-width: 768px) {
+  .dispatch-page {
+    gap: 12px;
+  }
+
+  .dispatch-card {
+    border-radius: 10px;
+  }
+
+  .dispatch-card-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+}

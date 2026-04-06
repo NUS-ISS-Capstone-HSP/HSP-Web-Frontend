@@ -31,8 +31,11 @@ http.interceptors.response.use(
     return response
   },
   (error: AxiosError<ApiResponse<unknown>>) => {
+    const responseData = error.response?.data as
+      | (ApiResponse<unknown> & { detail?: string })
+      | undefined
     const errorMessage =
-      error.response?.data?.message || error.message || '网络请求异常'
+      responseData?.message || responseData?.detail || error.message || '网络请求异常'
     message.error(errorMessage)
     return Promise.reject(error)
   },

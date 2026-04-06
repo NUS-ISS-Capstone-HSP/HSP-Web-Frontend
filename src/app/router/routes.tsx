@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { RouteShell } from '@/app/router/RouteShell'
 import { AppLayout } from '@/layouts/AppLayout'
 import { DashboardPage } from '@/pages/dashboard'
+import { DispatchPage } from '@/pages/dispatch'
 import { LoginPage } from '@/pages/login'
 import { NotFoundPage } from '@/pages/not-found'
 
@@ -32,6 +33,14 @@ export const routes: RouteObject[] = [
         element: (
           <RouteShell meta={{ title: '仪表盘', requiresAuth: true }}>
             <DashboardPage />
+          </RouteShell>
+        ),
+      },
+      {
+        path: 'dispatch',
+        element: (
+          <RouteShell meta={{ title: '派单管理', requiresAuth: true }}>
+            <DispatchPage />
           </RouteShell>
         ),
       },
