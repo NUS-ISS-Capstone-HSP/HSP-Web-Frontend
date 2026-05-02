@@ -1,7 +1,9 @@
 export interface UserProfile {
-  id?: string
+  id?: string | number
   name: string
+  email?: string
   role?: string
+  status?: string
 }
 
 export interface AuthState {
