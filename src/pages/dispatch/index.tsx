@@ -42,7 +42,6 @@ interface WorkerSearchFormValues {
 interface ManualDispatchFormValues {
   order_id: string
   worker_id: string
-  operator_id: string
 }
 
 interface HistorySearchFormValues {
@@ -215,11 +214,10 @@ export function DispatchPage() {
       const response = await manualAssignOrder({
         order_id: values.order_id.trim(),
         worker_id: values.worker_id.trim(),
-        operator_id: values.operator_id.trim(),
       })
 
-      setLatestDispatch(response)
-      message.success(`派单成功，Dispatch ID: ${response.dispatch_id}`)
+      setLatestDispatch(response.dispatch)
+      message.success(`派单成功，Dispatch ID: ${response.dispatch.dispatch_id}`)
     } finally {
       setManualDispatchLoading(false)
     }
@@ -325,7 +323,7 @@ export function DispatchPage() {
           onFinish={handleManualDispatch}
         >
           <Row gutter={[12, 0]}>
-            <Col xs={24} md={8}>
+            <Col xs={24} md={12}>
               <Form.Item
                 name="order_id"
                 label="订单ID"
@@ -334,7 +332,7 @@ export function DispatchPage() {
                 <Input placeholder="order-1001" />
               </Form.Item>
             </Col>
-            <Col xs={24} md={8}>
+            <Col xs={24} md={12}>
               <Form.Item
                 name="worker_id"
                 label="工人ID"
@@ -354,15 +352,6 @@ export function DispatchPage() {
                   </option>
                 ))}
               </datalist>
-            </Col>
-            <Col xs={24} md={8}>
-              <Form.Item
-                name="operator_id"
-                label="客服ID"
-                rules={[{ required: true, message: '请输入客服ID' }]}
-              >
-                <Input placeholder="csr-001" />
-              </Form.Item>
             </Col>
           </Row>
 

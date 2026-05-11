@@ -25,6 +25,16 @@
   background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
 }
 
+.dispatch-result-card .ant-descriptions-item-label {
+  color: #475569;
+}
+
+.dispatch-result-card .ant-descriptions-item-content {
+  color: #0f172a;
+  font-weight: 600;
+  word-break: break-word;
+}
+
 @media (max-width: 768px) {
   .dispatch-page {
     gap: 12px;
