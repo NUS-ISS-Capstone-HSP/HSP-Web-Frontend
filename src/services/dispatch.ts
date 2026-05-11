@@ -29,7 +29,6 @@ export interface ListAvailableWorkersParams {
 export interface ManualDispatchPayload {
   order_id: string
   worker_id: string
-  operator_id: string
 }
 
 interface ApiEnvelope<T> {
@@ -44,6 +43,10 @@ interface AvailableWorkersResponse {
 
 interface DispatchHistoryResponse {
   dispatches: DispatchRecord[]
+}
+
+interface ManualDispatchResponse {
+  dispatch: DispatchRecord
 }
 
 function unwrapData<T>(payload: T | ApiEnvelope<T>): T {
@@ -69,8 +72,8 @@ export async function listAvailableWorkers(params: ListAvailableWorkersParams) {
 }
 
 export async function manualAssignOrder(payload: ManualDispatchPayload) {
-  const response = await http.post<DispatchRecord | ApiEnvelope<DispatchRecord>>(
-    '/dispatch/v1/dispatches/manual',
+  const response = await http.post<ManualDispatchResponse | ApiEnvelope<ManualDispatchResponse>>(
+    '/dispatch/v1/assignments/manual',
     payload,
   )
 
@@ -79,7 +82,7 @@ export async function manualAssignOrder(payload: ManualDispatchPayload) {
 
 export async function getOrderDispatchHistory(orderId: string) {
   const response = await http.get<DispatchHistoryResponse | ApiEnvelope<DispatchHistoryResponse>>(
-    `/dispatch/v1/orders/${encodeURIComponent(orderId)}/dispatch-history`,
+    `/dispatch/v1/orders/${encodeURIComponent(orderId)}/history`,
   )
 
   return unwrapData(response.data)
