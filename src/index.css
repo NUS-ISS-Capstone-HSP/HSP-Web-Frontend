@@ -3,7 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
   color: #111827;
-  background-color: #f2f4f7;
+  background-color: #f4f7fb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -23,7 +23,10 @@ body,
 }
 
 body {
-  background: radial-gradient(circle at 10% 20%, #f7fafc 0%, #eef2f7 40%, #e6edf5 100%);
+  background:
+    radial-gradient(circle at top left, rgba(31, 122, 140, 0.16), transparent 28%),
+    radial-gradient(circle at top right, rgba(16, 42, 67, 0.09), transparent 22%),
+    linear-gradient(180deg, #f7fafc 0%, #eef3f8 42%, #edf2f7 100%);
 }
 
 a {

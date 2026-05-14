@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
 import { message } from 'antd'
+import { getStoredLocale, translateMessage } from '@/i18n/messages'
 import { useAuthStore } from '@/store/auth'
 import type { ApiResponse } from '@/types/api'
 
@@ -21,9 +22,10 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (response) => {
     const data = response.data as ApiResponse<unknown>
+    const locale = getStoredLocale()
 
     if (typeof data?.code === 'number' && data.code !== 0) {
-      const errorMessage = data.message || '请求失败'
+      const errorMessage = data.message || translateMessage(locale, 'common.requestFailed')
       message.error(errorMessage)
       return Promise.reject(new Error(errorMessage))
     }
@@ -31,11 +33,15 @@ http.interceptors.response.use(
     return response
   },
   (error: AxiosError<ApiResponse<unknown>>) => {
+    const locale = getStoredLocale()
     const responseData = error.response?.data as
       | (ApiResponse<unknown> & { detail?: string })
       | undefined
     const errorMessage =
-      responseData?.message || responseData?.detail || error.message || '网络请求异常'
+      responseData?.message ||
+      responseData?.detail ||
+      error.message ||
+      translateMessage(locale, 'common.networkError')
     message.error(errorMessage)
     return Promise.reject(error)
   },

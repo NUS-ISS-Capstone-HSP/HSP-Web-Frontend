@@ -1,7 +1,8 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, Space, Typography } from 'antd'
+import { Button, Card, Form, Input, Segmented, Space, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocale } from '@/i18n'
 import { login } from '@/services/auth'
 import { useAuthStore } from '@/store/auth'
 
@@ -13,6 +14,7 @@ interface LoginFormValues {
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { locale, setLocale, t } = useLocale()
   const token = useAuthStore((state) => state.token)
   const setToken = useAuthStore((state) => state.setToken)
   const [submitting, setSubmitting] = useState(false)
@@ -57,39 +59,65 @@ export function LoginPage() {
         display: 'grid',
         placeItems: 'center',
         padding: 16,
+        background:
+          'radial-gradient(circle at top left, rgba(31,122,140,0.18), transparent 34%), linear-gradient(180deg, #f5f7fb 0%, #eef4fb 100%)',
       }}
     >
-      <Card style={{ width: '100%', maxWidth: 420 }}>
+      <Card
+        style={{
+          width: '100%',
+          maxWidth: 460,
+          borderRadius: 24,
+          boxShadow: '0 24px 80px rgba(15, 23, 42, 0.12)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <Segmented
+            value={locale}
+            onChange={(value) => setLocale(value as 'zh-CN' | 'en-US')}
+            options={[
+              { label: t('layout.locale.zh'), value: 'zh-CN' },
+              { label: t('layout.locale.en'), value: 'en-US' },
+            ]}
+          />
+        </div>
         <Space direction="vertical" size={4} style={{ marginBottom: 24 }}>
           <Typography.Title level={3} style={{ margin: 0 }}>
-            登录 HSP
+            {t('login.title')}
           </Typography.Title>
-          <Typography.Text type="secondary">
-            请输入邮箱和密码
-          </Typography.Text>
         </Space>
 
-        <Form<LoginFormValues> layout="vertical" onFinish={onFinish}>
+        <Form<LoginFormValues>
+          layout="vertical"
+          initialValues={{
+            email: 'demo@hsp.local',
+            password: '123456',
+          }}
+          onFinish={onFinish}
+        >
           <Form.Item
             name="email"
-            label="邮箱"
+            label={t('login.email')}
             rules={[
-              { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '邮箱格式不正确' },
+              { required: true, message: t('login.emailRequired') },
+              { type: 'email', message: t('login.emailInvalid') },
             ]}
           >
             <Input prefix={<UserOutlined />} placeholder="owner@example.com" />
           </Form.Item>
           <Form.Item
             name="password"
-            label="密码"
-            rules={[{ required: true, message: '请输入密码' }]}
+            label={t('login.password')}
+            rules={[{ required: true, message: t('login.passwordRequired') }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={t('login.passwordPlaceholder')}
+            />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }}>
             <Button type="primary" htmlType="submit" block loading={submitting}>
-              登录
+              {t('login.login')}
             </Button>
           </Form.Item>
         </Form>

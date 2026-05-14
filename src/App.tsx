@@ -1,11 +1,12 @@
 import { App as AntdApp, ConfigProvider, type ThemeConfig } from 'antd'
-import zhCN from 'antd/locale/zh_CN'
 import dayjs from 'dayjs'
+import 'dayjs/locale/en'
 import 'dayjs/locale/zh-cn'
+import { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { AppRouter } from '@/app/router'
-
-dayjs.locale('zh-cn')
+import { LocaleProvider, useLocale } from '@/i18n'
+import { getAntdLocale, getDayjsLocale } from '@/i18n/messages'
 
 const themeConfig: ThemeConfig = {
   token: {
@@ -15,15 +16,29 @@ const themeConfig: ThemeConfig = {
   },
 }
 
-function App() {
+function AppShell() {
+  const { locale } = useLocale()
+
+  useEffect(() => {
+    dayjs.locale(getDayjsLocale(locale))
+  }, [locale])
+
   return (
-    <ConfigProvider locale={zhCN} theme={themeConfig}>
+    <ConfigProvider locale={getAntdLocale(locale)} theme={themeConfig}>
       <AntdApp>
         <BrowserRouter>
           <AppRouter />
         </BrowserRouter>
       </AntdApp>
     </ConfigProvider>
+  )
+}
+
+function App() {
+  return (
+    <LocaleProvider>
+      <AppShell />
+    </LocaleProvider>
   )
 }
 

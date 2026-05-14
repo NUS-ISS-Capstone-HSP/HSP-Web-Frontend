@@ -1,4 +1,4 @@
 export interface RouteMeta {
-  title: string
+  titleKey: string
   requiresAuth?: boolean
 }
