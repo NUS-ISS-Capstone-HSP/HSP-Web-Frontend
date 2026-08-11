@@ -26,17 +26,14 @@ interface WorkerScheduleSnapshot extends DemoWorker {
   orders: DemoOrder[]
 }
 
-function renderStatus(
-  status: DemoWorker['status'],
-  td: (value?: string | null) => string,
-) {
+function renderStatus(status: DemoWorker['status'], t: (key: string) => string) {
   const colorMap: Record<DemoWorker['status'], string> = {
     IDLE: 'success',
     BUSY: 'processing',
     INACTIVE: 'default',
   }
 
-  return <Tag color={colorMap[status]}>{td(status)}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
 export function WorkersPage() {
@@ -46,6 +43,7 @@ export function WorkersPage() {
   const [form] = Form.useForm<{ keyword?: string }>()
   const [workers, setWorkers] = useState<WorkerScheduleSnapshot[]>([])
   const [loading, setLoading] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
 
   const reloadWorkers = async (keyword?: string) => {
     setLoading(true)
@@ -113,7 +111,7 @@ export function WorkersPage() {
       title: t('common.status'),
       dataIndex: 'status',
       width: 120,
-      render: (status: DemoWorker['status']) => renderStatus(status, td),
+      render: (status: DemoWorker['status']) => renderStatus(status, t),
     },
     {
       title: t('workers.table.todayAssignments'),
@@ -147,10 +145,18 @@ export function WorkersPage() {
       render: (_, record) => (
         <Button
           type="link"
+          loading={togglingId === record.id}
+          disabled={Boolean(togglingId) && togglingId !== record.id}
           onClick={async () => {
-            await toggleDemoWorkerStatus(record.id)
-            message.success(t('workers.message.toggled'))
-            await reloadWorkers(form.getFieldValue('keyword'))
+            setTogglingId(record.id)
+
+            try {
+              await toggleDemoWorkerStatus(record.id)
+              message.success(t('workers.message.toggled'))
+              await reloadWorkers(form.getFieldValue('keyword'))
+            } finally {
+              setTogglingId(null)
+            }
           }}
         >
           {record.status === 'INACTIVE' ? t('workers.action.activate') : t('workers.action.deactivate')}

@@ -58,7 +58,7 @@ const menuItems = [
 export function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { locale, setLocale, t } = useLocale()
+  const { locale, setLocale, t, td } = useLocale()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const canManageWorkers = hasWorkerManagementAccess(user)
@@ -161,7 +161,7 @@ export function AppLayout() {
               <Button type="text">
                 <Space>
                   <Avatar size="small" icon={<UserOutlined />} />
-                  {user?.name ?? t('layout.unnamedUser')}
+                  {user?.name ? td(user.name) : t('layout.unnamedUser')}
                 </Space>
               </Button>
             </Dropdown>

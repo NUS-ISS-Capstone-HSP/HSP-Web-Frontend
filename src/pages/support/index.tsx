@@ -7,20 +7,21 @@ import { useLocale } from '@/i18n'
 import { listDemoSupportTickets, resolveDemoSupportTicket } from '@/services/demo'
 import type { DemoSupportTicket } from '@/types/operations'
 
-function renderStatus(status: DemoSupportTicket['status']) {
+function renderStatus(status: DemoSupportTicket['status'], t: (key: string) => string) {
   const colorMap: Record<DemoSupportTicket['status'], string> = {
     OPEN: 'default',
     PROCESSING: 'processing',
     RESOLVED: 'success',
   }
 
-  return <Tag color={colorMap[status]}>{status}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
 export function SupportPage() {
   const { t, td } = useLocale()
   const [tickets, setTickets] = useState<DemoSupportTicket[]>([])
   const [loading, setLoading] = useState(false)
+  const [resolvingId, setResolvingId] = useState<string | null>(null)
 
   const loadTickets = async () => {
     setLoading(true)
@@ -63,7 +64,7 @@ export function SupportPage() {
       title: t('support.table.currentStatus'),
       dataIndex: 'status',
       width: 120,
-      render: (status: DemoSupportTicket['status']) => renderStatus(status),
+      render: (status: DemoSupportTicket['status']) => renderStatus(status, t),
     },
     {
       title: t('support.table.owner'),
@@ -92,9 +93,17 @@ export function SupportPage() {
         ) : (
           <Button
             type="link"
+            loading={resolvingId === record.id}
+            disabled={Boolean(resolvingId) && resolvingId !== record.id}
             onClick={async () => {
-              await resolveDemoSupportTicket(record.id)
-              await loadTickets()
+              setResolvingId(record.id)
+
+              try {
+                await resolveDemoSupportTicket(record.id)
+                await loadTickets()
+              } finally {
+                setResolvingId(null)
+              }
             }}
           >
             {t('support.markDone')}
@@ -150,7 +159,7 @@ export function SupportPage() {
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 <Space style={{ justifyContent: 'space-between', width: '100%' }}>
                   <Typography.Text strong>{td(ticket.issueType)}</Typography.Text>
-                  {renderStatus(ticket.status)}
+                  {renderStatus(ticket.status, t)}
                 </Space>
                 <Typography.Text>{td(ticket.customerName)} · {ticket.orderId}</Typography.Text>
                 <Typography.Text type="secondary">

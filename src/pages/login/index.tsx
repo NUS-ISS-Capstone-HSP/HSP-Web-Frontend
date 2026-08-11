@@ -11,6 +11,13 @@ interface LoginFormValues {
   password: string
 }
 
+const DEMO_PASSWORD = '123456'
+
+const DEMO_ACCOUNTS: Record<string, { role: string; name: string }> = {
+  'demo@hsp.local': { role: 'CSR', name: '客服-演示账号' },
+  'boss@hsp.local': { role: 'BOSS', name: '老板-演示账号' },
+}
+
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -31,6 +38,21 @@ export function LoginPage() {
   }, [navigate, token])
 
   const onFinish = async (values: LoginFormValues) => {
+    const email = values.email.trim().toLowerCase()
+    const demoAccount = DEMO_ACCOUNTS[email]
+
+    if (demoAccount && values.password === DEMO_PASSWORD) {
+      setToken(`demo-token-${Date.now()}`, {
+        id: email,
+        name: demoAccount.name,
+        email,
+        role: demoAccount.role,
+        status: 'ACTIVE',
+      })
+      navigate(redirectTo, { replace: true })
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -121,6 +143,12 @@ export function LoginPage() {
             </Button>
           </Form.Item>
         </Form>
+        <Typography.Text
+          type="secondary"
+          style={{ display: 'block', marginTop: 16, fontSize: 12, textAlign: 'center' }}
+        >
+          {t('login.demoHint')}
+        </Typography.Text>
       </Card>
     </div>
   )

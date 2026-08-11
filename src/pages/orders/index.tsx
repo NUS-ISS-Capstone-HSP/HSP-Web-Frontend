@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Col,
+  DatePicker,
   Descriptions,
   Drawer,
   Form,
@@ -25,7 +26,7 @@ import {
   message,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useLocale } from '@/i18n'
 import {
@@ -44,6 +45,10 @@ interface OrderFilterValues {
   serviceType?: string
 }
 
+interface CreateOrderFormValues extends Omit<CreateOrderPayload, 'appointmentTime'> {
+  appointmentTime: Dayjs
+}
+
 interface AssignableWorkerOption {
   id: string
   name: string
@@ -56,7 +61,20 @@ function formatTime(value: string) {
   return dayjs(value).format('MM-DD HH:mm')
 }
 
-function renderStatus(status: DemoOrderStatus) {
+const ORDER_STATUSES: DemoOrderStatus[] = [
+  'CREATED',
+  'PENDING',
+  'ACCEPTED',
+  'IN_SERVICE',
+  'DONE',
+  'PAID',
+  'AFTER_SALE',
+  'COMPLETED',
+]
+
+const SERVICE_TYPES = ['日常保洁', '深度清洁', '擦窗', '搬家打包', '家电清洁', '办公室清洁', '小家电维修']
+
+function renderStatus(status: DemoOrderStatus, t: (key: string) => string) {
   const colorMap: Record<DemoOrderStatus, string> = {
     CREATED: 'default',
     PENDING: 'processing',
@@ -68,13 +86,13 @@ function renderStatus(status: DemoOrderStatus) {
     COMPLETED: 'gold',
   }
 
-  return <Tag color={colorMap[status]}>{status}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
 export function OrdersPage() {
   const { t, td } = useLocale()
   const [filterForm] = Form.useForm<OrderFilterValues>()
-  const [createForm] = Form.useForm<CreateOrderPayload>()
+  const [createForm] = Form.useForm<CreateOrderFormValues>()
 
   const [orders, setOrders] = useState<DemoOrder[]>([])
   const [loading, setLoading] = useState(false)
@@ -111,11 +129,14 @@ export function OrdersPage() {
     setAssignOptions(workers)
   }
 
-  const handleCreate = async (values: CreateOrderPayload) => {
+  const handleCreate = async (values: CreateOrderFormValues) => {
     setSubmitting(true)
 
     try {
-      await createDemoOrder(values)
+      await createDemoOrder({
+        ...values,
+        appointmentTime: values.appointmentTime.toISOString(),
+      })
       message.success(t('orders.message.created'))
       setCreateOpen(false)
       createForm.resetFields()
@@ -204,7 +225,7 @@ export function OrdersPage() {
       title: t('common.status'),
       dataIndex: 'status',
       width: 120,
-      render: (status: DemoOrderStatus) => renderStatus(status),
+      render: (status: DemoOrderStatus) => renderStatus(status, t),
     },
     {
       title: t('orders.table.amount'),
@@ -244,6 +265,7 @@ export function OrdersPage() {
               type="link"
               danger
               icon={<WarningOutlined />}
+              loading={submitting}
               onClick={() => void handleAfterSale(record.id)}
             >
               {t('orders.action.afterSale')}
@@ -333,14 +355,10 @@ export function OrdersPage() {
                   allowClear
                   options={[
                     { label: t('orders.allStatus'), value: '' },
-                    { label: 'CREATED', value: 'CREATED' },
-                    { label: 'PENDING', value: 'PENDING' },
-                    { label: 'ACCEPTED', value: 'ACCEPTED' },
-                    { label: 'IN_SERVICE', value: 'IN_SERVICE' },
-                    { label: 'DONE', value: 'DONE' },
-                    { label: 'PAID', value: 'PAID' },
-                    { label: 'AFTER_SALE', value: 'AFTER_SALE' },
-                    { label: 'COMPLETED', value: 'COMPLETED' },
+                    ...ORDER_STATUSES.map((status) => ({
+                      label: t(`status.${status}`),
+                      value: status,
+                    })),
                   ]}
                   placeholder={t('orders.allStatus')}
                 />
@@ -351,15 +369,7 @@ export function OrdersPage() {
                 <Select
                   allowClear
                   placeholder={t('orders.allServices')}
-                  options={[
-                    { label: td('日常保洁'), value: '日常保洁' },
-                    { label: td('深度清洁'), value: '深度清洁' },
-                    { label: td('擦窗'), value: '擦窗' },
-                    { label: td('搬家打包'), value: '搬家打包' },
-                    { label: td('家电清洁'), value: '家电清洁' },
-                    { label: td('办公室清洁'), value: '办公室清洁' },
-                    { label: td('小家电维修'), value: '小家电维修' },
-                  ]}
+                  options={SERVICE_TYPES.map((type) => ({ label: td(type), value: type }))}
                 />
               </Form.Item>
             </Col>
@@ -407,9 +417,11 @@ export function OrdersPage() {
               ¥{detailOrder.estimatedAmount}
             </Descriptions.Item>
             <Descriptions.Item label={t('orders.detail.source')}>{td(detailOrder.source)}</Descriptions.Item>
-            <Descriptions.Item label={t('orders.detail.priority')}>{detailOrder.priority}</Descriptions.Item>
+            <Descriptions.Item label={t('orders.detail.priority')}>
+              {t(`priority.${detailOrder.priority}`)}
+            </Descriptions.Item>
             <Descriptions.Item label={t('common.status')}>
-              {renderStatus(detailOrder.status)}
+              {renderStatus(detailOrder.status, t)}
             </Descriptions.Item>
             <Descriptions.Item label={t('orders.detail.worker')}>
               {detailOrder.assignedWorkerName ? td(detailOrder.assignedWorkerName) : '-'}
@@ -450,7 +462,7 @@ export function OrdersPage() {
         footer={null}
         width={720}
       >
-        <Form<CreateOrderPayload>
+        <Form<CreateOrderFormValues>
           form={createForm}
           layout="vertical"
           initialValues={{
@@ -458,6 +470,7 @@ export function OrdersPage() {
             source: '电话',
             durationHours: 2,
             estimatedAmount: 198,
+            appointmentTime: dayjs().add(2, 'hour').startOf('hour'),
           }}
           onFinish={(values) => void handleCreate(values)}
         >
@@ -487,13 +500,7 @@ export function OrdersPage() {
                 rules={[{ required: true, message: t('orders.create.serviceTypeRequired') }]}
               >
                 <Select
-                  options={[
-                    { label: td('日常保洁'), value: '日常保洁' },
-                    { label: td('深度清洁'), value: '深度清洁' },
-                    { label: td('家电清洁'), value: '家电清洁' },
-                    { label: td('搬家打包'), value: '搬家打包' },
-                    { label: td('小家电维修'), value: '小家电维修' },
-                  ]}
+                  options={SERVICE_TYPES.map((type) => ({ label: td(type), value: type }))}
                 />
               </Form.Item>
             </Col>
@@ -503,7 +510,12 @@ export function OrdersPage() {
                 label={t('orders.create.time')}
                 rules={[{ required: true, message: t('orders.create.timeRequired') }]}
               >
-                <Input placeholder="2026-05-13T21:30:00.000Z" />
+                <DatePicker
+                  showTime={{ format: 'HH:mm' }}
+                  format="YYYY-MM-DD HH:mm"
+                  style={{ width: '100%' }}
+                  disabledDate={(current) => current && current.isBefore(dayjs().startOf('day'))}
+                />
               </Form.Item>
             </Col>
             <Col xs={24}>
@@ -529,9 +541,9 @@ export function OrdersPage() {
               <Form.Item name="priority" label={t('orders.create.priority')}>
                 <Select
                   options={[
-                    { label: 'LOW', value: 'LOW' },
-                    { label: 'MEDIUM', value: 'MEDIUM' },
-                    { label: 'HIGH', value: 'HIGH' },
+                    { label: t('priority.LOW'), value: 'LOW' },
+                    { label: t('priority.MEDIUM'), value: 'MEDIUM' },
+                    { label: t('priority.HIGH'), value: 'HIGH' },
                   ]}
                 />
               </Form.Item>

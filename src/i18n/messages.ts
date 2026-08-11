@@ -285,6 +285,36 @@ const appMessages = {
   'demo.error.orderNotFound': { 'zh-CN': '订单不存在', 'en-US': 'Order not found' },
   'demo.error.workerNotFound': { 'zh-CN': '工人不存在', 'en-US': 'Worker not found' },
   'demo.error.ticketNotFound': { 'zh-CN': '售后单不存在', 'en-US': 'Support case not found' },
+  'login.demoHint': {
+    'zh-CN': '演示账号：demo@hsp.local（客服）· boss@hsp.local（老板），密码 123456',
+    'en-US': 'Demo accounts: demo@hsp.local (Agent) · boss@hsp.local (Boss), password 123456',
+  },
+  'status.CREATED': { 'zh-CN': '已创建', 'en-US': 'Created' },
+  'status.PENDING': { 'zh-CN': '待确认', 'en-US': 'Pending' },
+  'status.ACCEPTED': { 'zh-CN': '已接单', 'en-US': 'Accepted' },
+  'status.IN_SERVICE': { 'zh-CN': '服务中', 'en-US': 'In Service' },
+  'status.DONE': { 'zh-CN': '服务完成', 'en-US': 'Service Done' },
+  'status.PAID': { 'zh-CN': '已支付', 'en-US': 'Paid' },
+  'status.AFTER_SALE': { 'zh-CN': '售后中', 'en-US': 'After-Sales' },
+  'status.COMPLETED': { 'zh-CN': '已完结', 'en-US': 'Completed' },
+  'status.REJECTED': { 'zh-CN': '已拒单', 'en-US': 'Rejected' },
+  'status.UNPAID': { 'zh-CN': '待支付', 'en-US': 'Unpaid' },
+  'status.REFUNDED': { 'zh-CN': '已退款', 'en-US': 'Refunded' },
+  'status.OPEN': { 'zh-CN': '待处理', 'en-US': 'Open' },
+  'status.PROCESSING': { 'zh-CN': '处理中', 'en-US': 'Processing' },
+  'status.RESOLVED': { 'zh-CN': '已解决', 'en-US': 'Resolved' },
+  'status.IN_PROGRESS': { 'zh-CN': '进行中', 'en-US': 'In Progress' },
+  'status.FOLLOW_UP_REQUIRED': { 'zh-CN': '需跟进', 'en-US': 'Follow-Up Needed' },
+  'status.IDLE': { 'zh-CN': '空闲', 'en-US': 'Idle' },
+  'status.BUSY': { 'zh-CN': '忙碌', 'en-US': 'Busy' },
+  'status.INACTIVE': { 'zh-CN': '停用', 'en-US': 'Inactive' },
+  'status.AVAILABLE': { 'zh-CN': '可派单', 'en-US': 'Available' },
+  'status.ASSIGNED': { 'zh-CN': '已指派', 'en-US': 'Assigned' },
+  'status.ON_JOB': { 'zh-CN': '服务中', 'en-US': 'On Job' },
+  'status.OFF_DUTY': { 'zh-CN': '休息中', 'en-US': 'Off Duty' },
+  'priority.LOW': { 'zh-CN': '低', 'en-US': 'Low' },
+  'priority.MEDIUM': { 'zh-CN': '中', 'en-US': 'Medium' },
+  'priority.HIGH': { 'zh-CN': '高', 'en-US': 'High' },
 } as const
 
 const dataTextMap: Record<string, string> = {
@@ -333,6 +363,7 @@ const dataTextMap: Record<string, string> = {
   '客服-王晴': 'Agent - Wang Qing',
   '客服-陈晨': 'Agent - Chen Chen',
   '客服-演示账号': 'Demo Support Account',
+  '老板-演示账号': 'Demo Boss Account',
   '服务质量投诉': 'Service Quality Complaint',
   '发票申请': 'Invoice Request',
   '表扬反馈': 'Compliment',
@@ -441,6 +472,12 @@ export function translateDataText(locale: AppLocale, value?: string | null): str
 
   if (locale === 'zh-CN') {
     return value
+  }
+
+  const assignedMatch = value.match(/^已派给 (.+)，等待工人确认。$/)
+  if (assignedMatch) {
+    const workerName = dataTextMap[assignedMatch[1]] ?? assignedMatch[1]
+    return `Assigned to ${workerName}, waiting for worker confirmation.`
   }
 
   return dataTextMap[value] ?? value

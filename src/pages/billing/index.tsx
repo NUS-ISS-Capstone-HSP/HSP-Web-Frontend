@@ -7,7 +7,7 @@ import { useLocale } from '@/i18n'
 import { listDemoPaymentRecords } from '@/services/demo'
 import type { DemoPaymentRecord } from '@/types/operations'
 
-function renderStatus(status: DemoPaymentRecord['status']) {
+function renderStatus(status: DemoPaymentRecord['status'], t: (key: string) => string) {
   const colorMap: Record<DemoPaymentRecord['status'], string> = {
     UNPAID: 'default',
     PENDING: 'processing',
@@ -15,7 +15,7 @@ function renderStatus(status: DemoPaymentRecord['status']) {
     REFUNDED: 'error',
   }
 
-  return <Tag color={colorMap[status]}>{status}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
 export function BillingPage() {
@@ -64,7 +64,7 @@ export function BillingPage() {
       title: t('billing.table.paymentStatus'),
       dataIndex: 'status',
       width: 120,
-      render: (status: DemoPaymentRecord['status']) => renderStatus(status),
+      render: (status: DemoPaymentRecord['status']) => renderStatus(status, t),
     },
     {
       title: t('billing.table.channel'),

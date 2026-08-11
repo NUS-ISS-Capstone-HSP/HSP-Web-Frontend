@@ -18,14 +18,14 @@ import { useLocale } from '@/i18n'
 import { listDemoServiceRecords } from '@/services/demo'
 import type { DemoServiceRecord } from '@/types/operations'
 
-function renderStatus(status: DemoServiceRecord['status']) {
+function renderStatus(status: DemoServiceRecord['status'], t: (key: string) => string) {
   const colorMap: Record<DemoServiceRecord['status'], string> = {
     IN_PROGRESS: 'processing',
     COMPLETED: 'success',
     FOLLOW_UP_REQUIRED: 'warning',
   }
 
-  return <Tag color={colorMap[status]}>{status}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
 export function ServiceRecordsPage() {
@@ -79,7 +79,7 @@ export function ServiceRecordsPage() {
       title: t('common.status'),
       dataIndex: 'status',
       width: 140,
-      render: (status: DemoServiceRecord['status']) => renderStatus(status),
+      render: (status: DemoServiceRecord['status']) => renderStatus(status, t),
     },
     {
       title: t('serviceRecords.table.time'),
@@ -162,7 +162,7 @@ export function ServiceRecordsPage() {
             <Descriptions.Item label={t('billing.table.order')}>{detail.orderId}</Descriptions.Item>
             <Descriptions.Item label={t('orders.table.worker')}>{td(detail.workerName)}</Descriptions.Item>
             <Descriptions.Item label={t('billing.table.customer')}>{td(detail.customerName)}</Descriptions.Item>
-            <Descriptions.Item label={t('common.status')}>{renderStatus(detail.status)}</Descriptions.Item>
+            <Descriptions.Item label={t('common.status')}>{renderStatus(detail.status, t)}</Descriptions.Item>
             <Descriptions.Item label={t('serviceRecords.detail.started')}>
               {dayjs(detail.startedAt).format('YYYY-MM-DD HH:mm')}
             </Descriptions.Item>

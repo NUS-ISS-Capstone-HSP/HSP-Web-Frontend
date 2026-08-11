@@ -30,6 +30,7 @@ export interface ListAvailableWorkersParams {
 export interface ManualDispatchPayload {
   order_id: string
   worker_id: string
+  operator_id: string
 }
 
 interface ApiEnvelope<T> {

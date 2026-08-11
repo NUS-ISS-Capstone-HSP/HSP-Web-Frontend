@@ -22,7 +22,7 @@ import { useLocale } from '@/i18n'
 import { getDashboardOverview, resetDemoDatabase } from '@/services/demo'
 import type { DashboardOverview, DemoOrderStatus } from '@/types/operations'
 
-function renderStatusTag(status: DemoOrderStatus) {
+function renderStatusTag(status: DemoOrderStatus, t: (key: string) => string) {
   const colorMap: Record<DemoOrderStatus, string> = {
     CREATED: 'default',
     PENDING: 'processing',
@@ -34,7 +34,7 @@ function renderStatusTag(status: DemoOrderStatus) {
     COMPLETED: 'gold',
   }
 
-  return <Tag color={colorMap[status]}>{status}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
 export function DashboardPage() {
@@ -164,7 +164,7 @@ export function DashboardPage() {
                 <div key={item.status}>
                   <Space style={{ justifyContent: 'space-between', width: '100%' }}>
                     <Space>
-                      {renderStatusTag(item.status)}
+                      {renderStatusTag(item.status, t)}
                       <Typography.Text>
                         {item.count} {t('common.ordersUnit')}
                       </Typography.Text>
@@ -194,7 +194,7 @@ export function DashboardPage() {
                   <Space direction="vertical" size={6} style={{ width: '100%' }}>
                     <Space style={{ justifyContent: 'space-between', width: '100%' }} wrap>
                       <Typography.Text strong>{td(order.customerName)}</Typography.Text>
-                      {renderStatusTag(order.status)}
+                      {renderStatusTag(order.status, t)}
                     </Space>
                     <Typography.Text type="secondary">
                       {td(order.serviceType)} · {dayjs(order.appointmentTime).format('MM-DD HH:mm')} ·
@@ -217,7 +217,7 @@ export function DashboardPage() {
                       <Space style={{ justifyContent: 'space-between', width: '100%' }}>
                         <Typography.Text strong>{td(ticket.customerName)}</Typography.Text>
                         <Tag color={ticket.status === 'RESOLVED' ? 'success' : 'processing'}>
-                          {ticket.status}
+                          {t(`status.${ticket.status}`)}
                         </Tag>
                       </Space>
                       <Typography.Text type="secondary">{td(ticket.issueType)}</Typography.Text>

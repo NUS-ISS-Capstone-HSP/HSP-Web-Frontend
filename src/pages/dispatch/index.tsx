@@ -32,6 +32,7 @@ import {
   type AvailableWorker,
   type DispatchRecord,
 } from '@/services/dispatch'
+import { useAuthStore } from '@/store/auth'
 import type { DemoOrder, DemoWorker } from '@/types/operations'
 import './index.css'
 
@@ -86,17 +87,17 @@ function formatTime(value: string | null) {
   return parsed.isValid() ? parsed.format('YYYY-MM-DD HH:mm:ss') : value
 }
 
-function renderStatus(status: DispatchRecord['status']) {
+function renderStatus(status: DispatchRecord['status'], t: (key: string) => string) {
   const colorMap: Record<DispatchRecord['status'], string> = {
     PENDING: 'processing',
     ACCEPTED: 'success',
     REJECTED: 'error',
   }
 
-  return <Tag color={colorMap[status]}>{status}</Tag>
+  return <Tag color={colorMap[status]}>{t(`status.${status}`)}</Tag>
 }
 
-function renderWorkerStatus(status: string, td: (value?: string | null) => string) {
+function renderWorkerStatus(status: string, t: (key: string) => string) {
   const colorMap: Record<string, string> = {
     IDLE: 'success',
     BUSY: 'processing',
@@ -107,7 +108,7 @@ function renderWorkerStatus(status: string, td: (value?: string | null) => strin
     OFF_DUTY: 'default',
   }
 
-  return <Tag color={colorMap[status] ?? 'default'}>{td(status)}</Tag>
+  return <Tag color={colorMap[status] ?? 'default'}>{t(`status.${status}`)}</Tag>
 }
 
 function getTimelineColor(status: DemoOrder['status']) {
@@ -132,6 +133,7 @@ function formatHourLabel(hour: number) {
 
 export function DispatchPage() {
   const { t, td } = useLocale()
+  const authUser = useAuthStore((state) => state.user)
   const [workerSearchForm] = Form.useForm<WorkerSearchFormValues>()
   const [manualDispatchForm] = Form.useForm<ManualDispatchFormValues>()
   const [historySearchForm] = Form.useForm<HistorySearchFormValues>()
@@ -237,7 +239,7 @@ export function DispatchPage() {
       title: t('common.status'),
       dataIndex: 'status',
       width: 130,
-      render: (status: string) => renderWorkerStatus(status, td),
+      render: (status: string) => renderWorkerStatus(status, t),
     },
     {
       title: t('common.actions'),
@@ -281,7 +283,7 @@ export function DispatchPage() {
       title: t('common.status'),
       dataIndex: 'status',
       width: 120,
-      render: (status: DispatchRecord['status']) => renderStatus(status),
+      render: (status: DispatchRecord['status']) => renderStatus(status, t),
     },
     {
       title: t('dispatch.table.assignedAt'),
@@ -328,6 +330,7 @@ export function DispatchPage() {
       const response = await manualAssignOrder({
         order_id: values.order_id.trim(),
         worker_id: values.worker_id.trim(),
+        operator_id: authUser?.email ?? 'csr-demo-001',
       })
 
       setLatestDispatch(response)
@@ -503,7 +506,7 @@ export function DispatchPage() {
                     <Space direction="vertical" size={8} style={{ width: '100%', alignItems: 'stretch' }}>
                       <Space style={{ justifyContent: 'space-between', width: '100%' }}>
                         <Typography.Text strong>{td(worker.name)}</Typography.Text>
-                        {renderWorkerStatus(worker.status, td)}
+                        {renderWorkerStatus(worker.status, t)}
                       </Space>
                       <Typography.Text type="secondary">
                         {td(worker.region)} · {td(worker.employmentType)}
@@ -624,15 +627,6 @@ export function DispatchPage() {
                 ))}
               </datalist>
             </Col>
-            <Col xs={24} md={8}>
-              <Form.Item
-                name="operator_id"
-                label={t('dispatch.form.operatorId')}
-                rules={[{ required: true, message: t('dispatch.form.operatorIdRequired') }]}
-              >
-                <Input placeholder="csr-001" />
-              </Form.Item>
-            </Col>
           </Row>
 
           <Button
@@ -660,7 +654,7 @@ export function DispatchPage() {
                 {latestDispatch.operator_id}
               </Descriptions.Item>
               <Descriptions.Item label={t('common.status')}>
-                {renderStatus(latestDispatch.status)}
+                {renderStatus(latestDispatch.status, t)}
               </Descriptions.Item>
               <Descriptions.Item label={t('dispatch.table.assignedAt')}>
                 {formatTime(latestDispatch.assigned_at)}
